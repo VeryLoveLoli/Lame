@@ -12,7 +12,7 @@ import AudioToolbox
 /**
  Lame MP3 转码
  */
-class Lame {
+open class Lame {
     
     /**
      转码
@@ -27,7 +27,7 @@ class Lame {
      - parameter    progress:               进度
      - parameter    complete:               成功或失败
      */
-    static func converter(_ pcmPath: String, mp3Path: String, clientDescription: AudioStreamBasicDescription? = nil, ratio: Float = 8, quality: Int32 = 0, isInterleaved: Bool = true, progress: @escaping (Float)->Void, complete: @escaping (Bool)->Void) {
+    public static func converter(_ pcmPath: String, mp3Path: String, clientDescription: AudioStreamBasicDescription? = nil, ratio: Float = 8, quality: Int32 = 0, isInterleaved: Bool = true, progress: @escaping (Float)->Void, complete: @escaping (Bool)->Void) {
         
         let queue = DispatchQueue(label: "\(Date().timeIntervalSince1970).converter.\(Self.self).serial")
         
@@ -241,7 +241,7 @@ class Lame {
      - parameter    progress:       进度
      - parameter    complete:       转码完成
      */
-    static func converter(_ samplerate: Int32 = 44100, channels: Int32 = 2, quality: Int32 = 0, ratio: Float = 8, pcmPath: String, mp3Path: String, progress: @escaping (Float)->Void, complete: @escaping ()->Void) {
+    public static func converter(_ samplerate: Int32 = 44100, channels: Int32 = 2, quality: Int32 = 0, ratio: Float = 8, pcmPath: String, mp3Path: String, progress: @escaping (Float)->Void, complete: @escaping ()->Void) {
         
         let queue = DispatchQueue(label: "\(Date().timeIntervalSince1970).converter.\(Self.self).serial")
         
@@ -334,33 +334,33 @@ class Lame {
     }
     
     /// 队列
-    let queue: DispatchQueue
+    public let queue: DispatchQueue
     /// 编码器
-    let lame = lame_init()
+    public let lame = lame_init()
     /// 采样率
-    let sampleRate: Int32
+    public let sampleRate: Int32
     /// 采样位数
-    let bitsPer: Int32
+    public let bitsPer: Int32
     /// 通道数
-    let numberChannels: Int32
+    public let numberChannels: Int32
     /// 压缩比
-    let ratio: Float
+    public let ratio: Float
     /// 算法质量 0～9  0:最好但速度慢；9:最差但速度快
-    let quality: Int32
+    public let quality: Int32
     /// 双通道是否交错
-    let isInterleaved: Bool
+    public let isInterleaved: Bool
     /// MP3文件
-    let file: UnsafeMutablePointer<FILE>
+    public let file: UnsafeMutablePointer<FILE>
     /// MP3缓冲大小
-    let size: Int32 = 1024 * 8
+    public let size: Int32 = 1024 * 8
     /// MP3缓冲
-    let buffer: UnsafeMutablePointer<UInt8>
+    public let buffer: UnsafeMutablePointer<UInt8>
     /// 每次编码数据大小
-    let encodeSize: Int
+    public let encodeSize: Int
     /// PCM数据
-    var bytes: [UInt8] = []
+    open var bytes: [UInt8] = []
     /// 编码数据回调
-    var callback: ((Data)->Void)?
+    open var callback: ((Data)->Void)?
     
     /**
      初始化
@@ -373,7 +373,7 @@ class Lame {
      - parameter    isDualInterleaved:  双通道是否交错
      - parameter    path:               MP3路径
      */
-    init(_ sampleRate: Int32 = 44100, bitsPer: Int32 = 16, channels: Int32 = 2, ratio: Float = 8, quality: Int32 = 0, isDualInterleaved: Bool = true, path: String) {
+    public init(_ sampleRate: Int32 = 44100, bitsPer: Int32 = 16, channels: Int32 = 2, ratio: Float = 8, quality: Int32 = 0, isDualInterleaved: Bool = true, path: String) {
         
         queue = DispatchQueue(label: "\(Date().timeIntervalSince1970).\(Self.self).serial")
         numberChannels = channels
@@ -411,7 +411,7 @@ class Lame {
     /**
      添加数据
      */
-    func addData(_ bytes: [UInt8]) {
+    open func addData(_ bytes: [UInt8]) {
         
         queue.async {
             
@@ -531,7 +531,7 @@ class Lame {
     /**
      停止
      */
-    func stop() {
+    open func stop() {
         
         queue.async {
             
