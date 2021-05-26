@@ -6,13 +6,13 @@
 //
 
 import Foundation
-import Lame
 import AudioToolbox
+import Lame
 
 /**
  Lame MP3 转码
  */
-open class Lame {
+open class LameSwift {
     
     /**
      转码
