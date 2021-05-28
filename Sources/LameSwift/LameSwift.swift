@@ -8,6 +8,7 @@
 import Foundation
 import AudioToolbox
 import Lame
+import Print
 
 /**
  Lame MP3 转码
@@ -34,7 +35,7 @@ open class LameSwift {
         queue.async {
             
             /// 地址
-            guard let url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, pcmPath as CFString, .cfurlposixPathStyle, false) else { complete(false); print("CFURLCreateWithFileSystemPath Error"); return }
+            guard let url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, pcmPath as CFString, .cfurlposixPathStyle, false) else { complete(false); Print.error("CFURLCreateWithFileSystemPath Error"); return }
             
             /// 状态
             var status: OSStatus = noErr
@@ -42,25 +43,25 @@ open class LameSwift {
             /// 获取文件句柄
             var file: ExtAudioFileRef?
             status = ExtAudioFileOpenURL(url, &file)
-            guard status == noErr else { complete(false); print("ExtAudioFileOpenURL \(status)"); return }
+            guard status == noErr else { complete(false); Print.error("ExtAudioFileOpenURL \(status)"); return }
             
             /// 获取文件音频流参数
             var description = AudioStreamBasicDescription()
             var size = UInt32(MemoryLayout.stride(ofValue: description))
             status = ExtAudioFileGetProperty(file!, kExtAudioFileProperty_FileDataFormat, &size, &description)
-            guard status == noErr else { complete(false); print("ExtAudioFileGetProperty kExtAudioFileProperty_FileDataFormat \(status)"); return }
+            guard status == noErr else { complete(false); Print.error("ExtAudioFileGetProperty kExtAudioFileProperty_FileDataFormat \(status)"); return }
             
             /// 获取文件音频流帧数
             var numbersFrames: Int64 = 0
             var numbersFramesSize = UInt32(MemoryLayout.stride(ofValue: numbersFrames))
             status = ExtAudioFileGetProperty(file!, kExtAudioFileProperty_FileLengthFrames, &numbersFramesSize, &numbersFrames)
-            guard status == noErr else { complete(false); print("ExtAudioFileGetProperty kExtAudioFileProperty_FileLengthFrames \(status)"); return }
+            guard status == noErr else { complete(false); Print.error("ExtAudioFileGetProperty kExtAudioFileProperty_FileLengthFrames \(status)"); return }
             
             /// 设置客户端音频流参数（输出数据参数）
             var client = clientDescription
             if client != nil {
                 status = ExtAudioFileSetProperty(file!, kExtAudioFileProperty_ClientDataFormat, UInt32(MemoryLayout.stride(ofValue: client)), &client)
-                guard status == noErr else { complete(false); print("ExtAudioFileSetProperty kExtAudioFileProperty_ClientDataFormat \(status)"); return }
+                guard status == noErr else { complete(false); Print.error("ExtAudioFileSetProperty kExtAudioFileProperty_ClientDataFormat \(status)"); return }
                 /// 转码率后的帧数
                 numbersFrames = Int64(Float64(numbersFrames)/description.mSampleRate*client!.mSampleRate)
                 description = client!
@@ -85,7 +86,7 @@ open class LameSwift {
                 /// 每个包的字节数
                 pcm.mBytesPerPacket = description.mBytesPerFrame * description.mFramesPerPacket
                 status = ExtAudioFileSetProperty(file!, kExtAudioFileProperty_ClientDataFormat, UInt32(MemoryLayout.stride(ofValue: pcm)), &pcm)
-                guard status == noErr else { complete(false); print("ExtAudioFileSetProperty kExtAudioFileProperty_ClientDataFormat \(status)"); return }
+                guard status == noErr else { complete(false); Print.error("ExtAudioFileSetProperty kExtAudioFileProperty_ClientDataFormat \(status)"); return }
                 /// 转码率后的帧数
                 numbersFrames = Int64(Float64(numbersFrames)/description.mSampleRate*pcm.mSampleRate)
                 description = pcm
@@ -160,10 +161,10 @@ open class LameSwift {
                 
                 /// 读取数据
                 status = ExtAudioFileRead(file!, &ioNumberFrames, &bufferList)
-                guard status == noErr else { print("ExtAudioFileRead \(status)"); closeFile(); complete(false); return }
+                guard status == noErr else { Print.error("ExtAudioFileRead \(status)"); closeFile(); complete(false); return }
                 
                 /// 转换读取数据
-                guard let pcmBuffer = bufferList.mBuffers.mData?.bindMemory(to: Int16.self, capacity: Int(bufferList.mBuffers.mDataByteSize)/MemoryLayout.stride(ofValue: Int16())) else { print("mBuffers.mData to UnsafeMutablePointer<Int16> Error"); closeFile(); complete(false); return }
+                guard let pcmBuffer = bufferList.mBuffers.mData?.bindMemory(to: Int16.self, capacity: Int(bufferList.mBuffers.mDataByteSize)/MemoryLayout.stride(ofValue: Int16())) else { Print.error("mBuffers.mData to UnsafeMutablePointer<Int16> Error"); closeFile(); complete(false); return }
                 
                 if ioNumberFrames == 0 {
                     
@@ -209,7 +210,7 @@ open class LameSwift {
                     
                     if number < 0 {
                         
-                        print("lame_encode_buffer error write: \(number)")
+                        Print.error("lame_encode_buffer error write: \(number)")
                         closeFile()
                         complete(false)
                         return
@@ -522,7 +523,7 @@ open class LameSwift {
                 }
                 else {
                     
-                    print("lame_encode_buffer error number: \(number)")
+                    Print.error("lame_encode_buffer error number: \(number)")
                 }
             }
         }
@@ -549,7 +550,7 @@ open class LameSwift {
             }
             else {
                 
-                print("lame_encode_flush error number: \(number)")
+                Print.error("lame_encode_flush error number: \(number)")
             }
             
             /// 关闭
