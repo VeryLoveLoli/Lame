@@ -350,6 +350,8 @@ open class LameSwift {
     public let quality: Int32
     /// 双通道是否交错
     public let isInterleaved: Bool
+    /// MP3文件路径
+    public let path: String
     /// MP3文件
     public let file: UnsafeMutablePointer<FILE>
     /// MP3缓冲大小
@@ -396,11 +398,18 @@ open class LameSwift {
         
         isInterleaved = isDualInterleaved
         
+        self.path = path
+        
         /// 删除旧的MP3文件
-        do {
-            try FileManager.default.removeItem(atPath: path)
-        } catch  {
+        if FileManager.default.fileExists(atPath: path) {
             
+            do {
+                
+                try FileManager.default.removeItem(atPath: path)
+                
+            } catch  {
+                
+            }
         }
         
         /// MP3文件
@@ -417,31 +426,6 @@ open class LameSwift {
         queue.async {
             
             self.bytes += bytes
-            
-            /*
-            var list: [Data] = []
-            
-            while self.data.count >= self.encodeSize {
-                
-                let bytes = self.data[0..<self.encodeSize]
-                
-                list.append(bytes)
-                
-                if self.data.count - self.encodeSize == 0 {
-                    
-                    self.data = Data()
-                }
-                else {
-                    
-                    self.data = self.data[self.encodeSize..<self.data.count-self.encodeSize]
-                }
-            }
-            
-            for item in list {
-                
-                self.encode(bytes)
-            }
-            */
             
              var start = 0
              var end = self.encodeSize
