@@ -515,8 +515,11 @@ open class LameSwift {
     
     /**
      停止
+     
+     - parameter    success:    成功回调
+     - parameter    fail:       失败回调（code: 错误码）
      */
-    open func stop() {
+    open func stop(_ success: (() -> Void)? = nil, fail: ((_ code: Int32) -> Void)? = nil) {
         
         queue.async {
             
@@ -531,10 +534,14 @@ open class LameSwift {
             if number >= 0 {
                 
                 fwrite(self.buffer, Int(number), 1, self.file)
+                
+                success?()
             }
             else {
                 
                 Print.error("lame_encode_flush error number: \(number)")
+                
+                fail?(number)
             }
             
             /// 关闭
